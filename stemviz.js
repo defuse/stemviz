@@ -234,8 +234,19 @@ function draw_outer_circle(canvas, ctx, color, value, angle) {
     ctx.strokeStyle = '#ffffff';
     ctx.stroke();
 
-    var start_angle = angle - Math.PI/2 - Math.PI/16;
+    var start_angle = angle - Math.PI/2 - Math.PI/16 - Math.PI/4;
     ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, start_angle, start_angle + Math.PI/8, false);
+    ctx.strokeStyle = '#000000';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, Math.PI + start_angle, Math.PI + start_angle + Math.PI/8, false);
+    ctx.strokeStyle = '#000000';
+    ctx.stroke();
+
+    // opposite direction
+    start_angle = -Math.PI/16 - angle - Math.PI/4;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, start_angle, start_angle + Math.PI/8, false);
     ctx.strokeStyle = '#000000';
@@ -315,7 +326,8 @@ var drop_snare = load_wav("./Mix21StemsNormalized/ABCDEF-Mix021 Drop Snare.wav",
 var hard_ssw = load_wav("./Mix21StemsNormalized/ABCDEF-Mix021 Hard SSW.wav", FRAMES_PER_SECOND);
 var drop_fx = load_wav("./Mix21StemsNormalized/ABCDEF-Mix021 Drop FX.wav", FRAMES_PER_SECOND);
 
-var time_s = 0.0;
+// Start a tiny bit ahead, so the visuals preceede the audio slightly
+var time_s = 0.040;
 
 console.log("Drawing video frames...");
 
