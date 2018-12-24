@@ -17,6 +17,12 @@ function load_wav(path, fps) {
 
     var wav_contents = fs.readFileSync(path);
     var wav = new WaveFile(wav_contents);
+    wav.toBitDepth("16");
+
+    if (wav.fmt.numChannels != 2) {
+        console.log("ERROR: wavs must be stereo.");
+        exit();
+    }
 
     // FIXME: this assumes 16 bit (/2)
     // FIXME: assuming stereo (/2 again)
@@ -43,8 +49,7 @@ function load_wav(path, fps) {
             try {
                 // FIXME: assumes 16-bit
                 var sample = wav.getSample(start_sample + s) / 32768;
-            }
-            catch {
+            } catch (e) {
                 wav_computed.rms[frame] = 0.0;
                 break;
             }
