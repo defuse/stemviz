@@ -5,6 +5,8 @@ const WaveFile = require('wavefile');
 
 // ffmpeg -r 30 -f image2 -s 1920x1080 -i frames/%05d.png -i test.wav -vcodec libx264 -crf 25 -pix_fmt yuv420p circle.mp4
 
+// TODO: add option to just play the animation in realtime w/ audio
+
 var leftpad = require('leftpad');
 var fs = require('fs');
 
@@ -251,7 +253,7 @@ var time_s = 0.0;
 console.log("Drawing video frames...");
 
 // 226
-for (var frame = 0; frame < 120 * FRAMES_PER_SECOND; frame++) {
+for (var frame = 0; frame < 226 * FRAMES_PER_SECOND; frame++) {
     console.log("On frame: " + frame);
     /* Clear everything. */
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -288,7 +290,8 @@ for (var frame = 0; frame < 120 * FRAMES_PER_SECOND; frame++) {
         Math.max(
             snare_fill.rms_at(time_s),
             downlifter.rms_at(time_s),
-            fast_bongo.rms_at(time_s)
+            fast_bongo.rms_at(time_s),
+            rev_crash.rms_at(time_s)
         )
     );
 
