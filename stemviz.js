@@ -124,24 +124,6 @@ function load_wav(path, fps) {
     return wav_computed;
 }
 
-function range(value, start, stop) {
-    if (value < start) {
-        return start;
-    } else if (value > stop) {
-        return stop;
-    } else {
-        return value;
-    }
-}
-
-function concave(value, parameter) {
-
-}
-
-function convex(value, parameter) {
-
-}
-
 function draw_bar_chart(canvas, ctx, elements) {
     var BAR_WIDTH = Math.floor(canvas.width / elements.length);
 
@@ -164,7 +146,7 @@ function draw_bg_color(canvas, ctx, color, value) {
     ctx.globalAlpha = 1.0;
 }
 
-function draw_outer_circle(canvas, ctx, color, value) {
+function draw_outer_circle(canvas, ctx, color, value, angle) {
     var MIN_RADIUS = canvas.width / 6.0;
     var MAX_RADIUS = canvas.height / 2.0;
     var radius = (MAX_RADIUS - MIN_RADIUS) * value + MIN_RADIUS;
@@ -177,6 +159,17 @@ function draw_outer_circle(canvas, ctx, color, value) {
     ctx.fill();
     ctx.lineWidth = 10;
     ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    var start_angle = angle - Math.PI/2 - Math.PI/16;
+    ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, start_angle, start_angle + Math.PI/8, false);
+    ctx.strokeStyle = '#000000';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, Math.PI + start_angle, Math.PI + start_angle + Math.PI/8, false);
+    ctx.strokeStyle = '#000000';
     ctx.stroke();
 }
 
@@ -252,6 +245,9 @@ var time_s = 0.0;
 
 console.log("Drawing video frames...");
 
+var outer_circle_color = "#4d1b7b";
+var BPM = 140;
+
 // 226
 for (var frame = 0; frame < 226 * FRAMES_PER_SECOND; frame++) {
     console.log("On frame: " + frame);
@@ -280,7 +276,8 @@ for (var frame = 0; frame < 226 * FRAMES_PER_SECOND; frame++) {
         Math.max(
             rev_crash.rms_at(time_s),
             drop_fx.rms_at(time_s),
-            funky_bongo.rms_at(time_s)
+            funky_bongo.rms_at(time_s),
+            vox_riser.rms_at(time_s)
         )
     );
 
@@ -295,14 +292,21 @@ for (var frame = 0; frame < 226 * FRAMES_PER_SECOND; frame++) {
         )
     );
 
+    if (drop_kick.rms_at(time_s) > 0) {
+        outer_circle_color = "#e80000"
+    } else if (verse_kick.rms_at(time_s) > 0 || verse_kick_2.rms_at(time_s) > 0) {
+        outer_circle_color = "#4d1b7b"
+    }
+
     /* Outer Circle */
     draw_outer_circle(
-        canvas, ctx, "#4d1b7b",
+        canvas, ctx, outer_circle_color,
         Math.max(
             verse_kick.rms_at(time_s),
             verse_kick_2.rms_at(time_s),
             drop_kick.rms_at(time_s)
-        )
+        ),
+        ((time_s / 60.0 * BPM / 8) % 1) * 2 * Math.PI
     );
 
     /* Inner Circle */
