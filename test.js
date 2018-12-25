@@ -16,26 +16,44 @@ function load_wav(path, fps) {
     var wav_computed = { fps: fps };
     wav_computed.data = {};
 
-    // FIXME: return 0 on oob time
-
     /* RMS */
     wav_computed.rms_at = function(time_s) {
-        return this.data.rms[Math.floor(time_s * this.fps)];
+        var frame = Math.floor(time_s * this.fps);
+        if (frame < this.data.rms.length) {
+            return this.data.rms[frame];
+        } else {
+            return 0.0;
+        }
     };
 
     /* Peak TODO */
     wav_computed.peak_at = function(time_s) {
-        return this.data.peak[Math.floor(time_s * this.fps)];
+        var frame = Math.floor(time_s * this.fps);
+        if (frame < this.data.rms.length) {
+            return this.data.peak[frame];
+        } else {
+            return 0.0;
+        }
     };
 
     /* Moving average RMS TODO */
     wav_computed.avg_rms_at = function(time_s) {
-        return this.data.avg_rms[Math.floor(time_s * this.fps)];
+        var frame = Math.floor(time_s * this.fps);
+        if (frame < this.data.rms.length) {
+            return this.data.avg_rms[frame];
+        } else {
+            return 0.0;
+        }
     };
 
     /* Pitch tracker TODO*/
     wav_computed.pitch_at = function(time_s) {
-        return this.data.pitch[Math.floor(time_s * this.fps)];
+        var frame = Math.floor(time_s * this.fps);
+        if (frame < this.data.rms.length) {
+            return this.data.pitch[frame];
+        } else {
+            return 0.0;
+        }
     };
 
     var cache_path = path + ".stv";
@@ -171,7 +189,7 @@ function draw_inner_circle(canvas, ctx, color, value) {
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 4;
     ctx.strokeStyle = '#ffffff';
     ctx.stroke();
 }
@@ -242,12 +260,12 @@ for (var frame = 0; frame < 120 * FRAMES_PER_SECOND; frame++) {
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    var elements = [
-        airy_chords, verse_melody, snare_fill, rev_snap, verse_snap, rev_crash,
-        funky_bongo, fast_bongo, verse_snare, downlifter, build_arp, build_snare,
-        vox_riser, drop_kick, drop_snare, hard_ssw, drop_fx
-    ];
-
+    //var elements = [
+    //    airy_chords, verse_melody, snare_fill, rev_snap, verse_snap, rev_crash,
+    //    funky_bongo, fast_bongo, verse_snare, downlifter, build_arp, build_snare,
+    //    vox_riser, drop_kick, drop_snare, hard_ssw, drop_fx
+    //];
+    //
     //draw_bar_chart(canvas, ctx, elements);
 
     /* Background Color */
@@ -255,26 +273,46 @@ for (var frame = 0; frame < 120 * FRAMES_PER_SECOND; frame++) {
     draw_bg_color(canvas, ctx, "#ffffff", hard_ssw.rms_at(time_s));
 
     /* Riser Bars */
-    draw_riser_bars(canvas, ctx, "#ef4f91", rev_crash.rms_at(time_s));
-    draw_riser_bars(canvas, ctx, "#ef4f91", drop_fx.rms_at(time_s));
-    draw_riser_bars(canvas, ctx, "#ef4f91", funky_bongo.rms_at(time_s));
-
+    draw_riser_bars(
+        canvas, ctx, "#ef4f91",
+        Math.max(
+            rev_crash.rms_at(time_s),
+            drop_fx.rms_at(time_s),
+            funky_bongo.rms_at(time_s)
+        )
+    );
 
     /* Faller Bars */
-    draw_faller_bars(canvas, ctx, "#673888", snare_fill.rms_at(time_s));
-    draw_faller_bars(canvas, ctx, "#673888", downlifter.rms_at(time_s));
-    draw_faller_bars(canvas, ctx, "#673888", fast_bongo.rms_at(time_s));
+    draw_faller_bars(
+        canvas, ctx, "#673888",
+        Math.max(
+            snare_fill.rms_at(time_s),
+            downlifter.rms_at(time_s),
+            fast_bongo.rms_at(time_s)
+        )
+    );
 
     /* Outer Circle */
-    draw_outer_circle(canvas, ctx, "#4d1b7b", verse_kick.rms_at(time_s));
-    draw_outer_circle(canvas, ctx, "#4d1b7b", verse_kick_2.rms_at(time_s));
-    draw_outer_circle(canvas, ctx, "#4d1b7b", drop_kick.rms_at(time_s));
+    draw_outer_circle(
+        canvas, ctx, "#4d1b7b",
+        Math.max(
+            verse_kick.rms_at(time_s),
+            verse_kick_2.rms_at(time_s),
+            drop_kick.rms_at(time_s)
+        )
+    );
 
     /* Inner Circle */
-    draw_inner_circle(canvas, ctx, "#c79dd7", build_snare.rms_at(time_s));
-    draw_inner_circle(canvas, ctx, "#c79dd7", drop_snare.rms_at(time_s));
-    draw_inner_circle(canvas, ctx, "#c79dd7", verse_snap.rms_at(time_s));
-    draw_inner_circle(canvas, ctx, "#c79dd7", verse_snare.rms_at(time_s));
+    draw_inner_circle(
+        canvas, ctx, "#ef4f91",
+        Math.max(
+            0.50 * rev_snap.rms_at(time_s),
+            build_snare.rms_at(time_s),
+            drop_snare.rms_at(time_s),
+            verse_snap.rms_at(time_s),
+            verse_snare.rms_at(time_s)
+        )
+    );
 
     fs.writeFileSync('frames/' + leftpad(frame, 5) + '.png', canvas.toBuffer());
     time_s += 1.0/FRAMES_PER_SECOND;
