@@ -193,21 +193,21 @@ function draw_spectra_bars(canvas, ctx, spectra) {
     // 1080 is divisible by 90
     var truncated = spectra.slice(0, 90);
 
-    var BAR_HEIGHT = Math.floor(canvas.height / truncated.length);
+    var BAR_WIDTH = Math.floor(canvas.width / truncated.length);
 
     for (var i = 0; i < truncated.length; i++) {
         ctx.fillStyle = "#ffeb3d";
         ctx.fillRect(
+            BAR_WIDTH * i,
             0,
-            BAR_HEIGHT * i,
-            truncated[i] * canvas.width,
-            BAR_HEIGHT
+            BAR_WIDTH,
+            truncated[i] * canvas.height
         );
         ctx.fillRect(
-            canvas.width - truncated[truncated.length - i - 1] * canvas.width,
-            BAR_HEIGHT * i,
-            truncated[truncated.length - i - 1] * canvas.width,
-            BAR_HEIGHT
+            BAR_WIDTH * i,
+            canvas.height - truncated[truncated.length - i - 1] * canvas.height,
+            BAR_WIDTH,
+            truncated[truncated.length - i - 1] * canvas.height
         );
     }
 }
@@ -337,6 +337,8 @@ for (var frame = 0; frame < 226 * FRAMES_PER_SECOND; frame++) {
     draw_bg_color(canvas, ctx, "#363b74", airy_chords.avg_rms_at(time_s));
     draw_bg_color(canvas, ctx, "#ffffff", hard_ssw.rms_at(time_s));
 
+    /* Spectrum */
+    //draw_spectra_bars(canvas, ctx, master.spectra_at(time_s));
 
     /* Riser Bars */
     draw_riser_bars(
@@ -361,9 +363,6 @@ for (var frame = 0; frame < 226 * FRAMES_PER_SECOND; frame++) {
             vox_riser.avg_rms_at(time_s)
         )
     );
-
-    /* Spectra along the side. */
-    draw_spectra_bars(canvas, ctx, master.spectra_at(time_s));
 
     if (drop_kick.rms_at(time_s) > 0) {
         outer_circle_color = "#e80000";
