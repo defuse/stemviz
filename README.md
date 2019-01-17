@@ -9,7 +9,7 @@ you want to visualize.
 ## Dependencies
 
 - The `ffmpeg` utility.
-- `npm install canvas wavefile leftpad`
+- `npm install canvas wavefile leftpad fourier-transform`
 
 ## Usage
 
